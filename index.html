@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Bisnis Saya - Dashboard Keuangan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    input, select, button {
+      padding: 8px;
+      margin-top: 5px;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #f4f4f4;
+    }
+    .summary {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Dashboard Keuangan Bisnis</h1>
+  </header>
+
+  <div class="container">
+    <h2>Tambah Catatan</h2>
+    <div class="form-group">
+      <label for="jenis">Jenis:</label>
+      <select id="jenis">
+        <option value="modal">Modal Awal</option>
+        <option value="pengeluaran">Pengeluaran</option>
+        <option value="pendapatan">Pendapatan</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="jumlah">Jumlah (Rp):</label>
+      <input type="number" id="jumlah" placeholder="Masukkan jumlah...">
+    </div>
+    <button onclick="tambahData()">Tambah</button>
+
+    <h2>Riwayat Transaksi</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Jenis</th>
+          <th>Jumlah (Rp)</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelData"></tbody>
+    </table>
+
+    <div class="summary">
+      <h2>Ringkasan</h2>
+      <p>Modal Awal: Rp <span id="totalModal">0</span></p>
+      <p>Total Pengeluaran: Rp <span id="totalPengeluaran">0</span></p>
+      <p>Total Pendapatan: Rp <span id="totalPendapatan">0</span></p>
+      <h3>Laba/Rugi: Rp <span id="labaRugi">0</span></h3>
+    </div>
+  </div>
+
+  <script>
+    let data = JSON.parse(localStorage.getItem("bisnisData")) || [];
+
+    function renderData() {
+      const tabel = document.getElementById("tabelData");
+      tabel.innerHTML = "";
+
+      let totalModal = 0, totalPengeluaran = 0, totalPendapatan = 0;
+
+      data.forEach((item, index) => {
+        if (item.jenis === "modal") totalModal += item.jumlah;
+        if (item.jenis === "pengeluaran") totalPengeluaran += item.jumlah;
+        if (item.jenis === "pendapatan") totalPendapatan += item.jumlah;
+
+        tabel.innerHTML += `
+          <tr>
+            <td>${item.jenis}</td>
+            <td>${item.jumlah.toLocaleString()}</td>
+            <td><button onclick="hapusData(${index})">Hapus</button></td>
+          </tr>
+        `;
+      });
+
+      document.getElementById("totalModal").innerText = totalModal.toLocaleString();
+      document.getElementById("totalPengeluaran").innerText = totalPengeluaran.toLocaleString();
+      document.getElementById("totalPendapatan").innerText = totalPendapatan.toLocaleString();
+
+      let labaRugi = totalPendapatan - (totalModal + totalPengeluaran);
+      document.getElementById("labaRugi").innerText = labaRugi.toLocaleString();
+    }
+
+    function tambahData() {
+      const jenis = document.getElementById("jenis").value;
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+
+      if (!jumlah || jumlah <= 0) return alert("Masukkan jumlah yang valid!");
+
+      data.push({ jenis, jumlah });
+      localStorage.setItem("bisnisData", JSON.stringify(data));
+      renderData();
+      document.getElementById("jumlah").value = "";
+    }
+
+    function hapusData(index) {
+      data.splice(index, 1);
+      localStorage.setItem("bisnisData", JSON.stringify(data));
+      renderData();
+    }
+
+    // Render pertama kali
+    renderData();
+  </script>
+</body>
+</html>
